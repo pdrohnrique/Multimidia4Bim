@@ -45,11 +45,17 @@ public class Door : MonoBehaviour
         // Se precisa de chave, checa antes
         if (requiresKey)
         {
-            if (_playerController == null || !_playerController.hasKey)
+            if (_playerController == null)
+                return;
+            
+            Inventory inv = _playerController.GetComponent<Inventory>();
+            if (inv == null || !inv.UseKey())
             {
                 Debug.Log("Porta trancada. Você precisa de uma chave.");
                 return;
             }
+
+            _playerController.hasKey = inv.keysCount > 0;
         }
         // Teleporta
         _player.position = teleportTarget.position;

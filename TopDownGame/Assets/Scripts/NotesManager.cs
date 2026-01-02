@@ -19,5 +19,8 @@ public class NotesManager : MonoBehaviour
         bool active = !notesMenu.activeSelf;
         notesMenu.SetActive(active);
         Time.timeScale = active ? 0f : 1f;
+        
+        Cursor.visible = active;
+        Cursor.lockState = active ? CursorLockMode.None : CursorLockMode.Locked;
     }
 }

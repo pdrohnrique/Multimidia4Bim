@@ -41,4 +41,13 @@ public class Inventory : MonoBehaviour
         batteryCount--;
         return true;
     }
+
+    public bool UseKey()
+    {
+        if (keysCount <= 0)
+            return false;
+        
+        keysCount--;
+        return true;
+    }
 }
