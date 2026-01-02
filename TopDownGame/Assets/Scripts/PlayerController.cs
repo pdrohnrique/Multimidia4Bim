@@ -11,15 +11,18 @@ public class PlayerController : MonoBehaviour
     public Light2D flashlight;
     public float maxBattery = 100f;
     public float batteryDrain = 10f;
+    public float BatteryPercent => (maxBattery <= 0f) ? 0f : (_battery / maxBattery * 100f);
     
     [HideInInspector] public bool canMove = true;
     
+    Vector2 _input;
     private float _battery;
     private Rigidbody2D _rb;
     private SpriteRenderer _sr;
     public bool hasKey;
     public bool isHiding;
-    Vector2 _input;
+    public Inventory inventory;
+    public Health health;
     
     public void GiveKey()
     {
@@ -33,6 +36,11 @@ public class PlayerController : MonoBehaviour
         _sr = GetComponent<SpriteRenderer>();
         _battery = maxBattery;
         flashlight.enabled = false;
+        
+        if (inventory == null)
+            inventory =  GetComponent<Inventory>();
+        if (health == null)
+            health = GetComponent<Health>();
     }
     
     void Update()
@@ -75,6 +83,34 @@ public class PlayerController : MonoBehaviour
                 _battery = 0;
             }
         }
+        
+        // 1 = usar medicamento
+        if (Input.GetKeyDown(KeyCode.Alpha1))
+        {
+            if (inventory != null && inventory.UseMed())
+            {
+                if (health != null)
+                    health.Heal(30); // ajusta esse valor depois
+            }
+        }
+
+        // 2 = usar pilha
+        if (Input.GetKeyDown(KeyCode.Alpha2))
+        {
+            if (inventory != null && inventory.UseBattery())
+            {
+                RechargeBattery(25f); // ajusta valor depois
+            }
+        }
+
+        // Tab = abrir menu de notas
+        if (Input.GetKeyDown(KeyCode.Tab))
+        {
+            NotesManager notes = GetComponent<NotesManager>();
+            if (notes != null)
+                notes.ToggleNotesMenu();
+        }
+
     }
 
     void FixedUpdate()
@@ -111,6 +147,16 @@ public class PlayerController : MonoBehaviour
                 return;
             }
         }
+        
+        foreach (var h in hits)
+        {
+            ItemPickup pickup = h.GetComponent<ItemPickup>();
+            if (pickup != null)
+            {
+                pickup.TryPickup();
+                return;
+            }
+        }
     }
 
     public void ToggleHide()
@@ -130,5 +176,15 @@ public class PlayerController : MonoBehaviour
         {
             _sr.enabled = true;
         }
+    }
+
+    private void RechargeBattery(float amount)
+    {
+        _battery += amount;
+        _battery = Mathf.Clamp(_battery, 0f, maxBattery);
+        
+        // Se quiser, liga a lanterna se tiver bateria de novo:
+        // if (_battery > 0f && !flashlight.enabled)
+        // flashlight.enabled = true;
     }
 }

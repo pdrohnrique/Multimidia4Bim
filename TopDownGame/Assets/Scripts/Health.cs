@@ -4,6 +4,7 @@ public class Health : MonoBehaviour
 {
     public int maxHealth = 100;
     public float invincibilityTime = 0.8f;
+    public int Current => _currentHealth;
     
     int _currentHealth;
     bool _isInvincible;
@@ -24,6 +25,13 @@ public class Health : MonoBehaviour
                 _isInvincible = false;
             }
         }
+    }
+    
+    public void Heal(int amount)
+    {
+        _currentHealth += amount;
+        _currentHealth = Mathf.Clamp(_currentHealth, 0, maxHealth);
+        Debug.Log("Vida curada. Atual: " + _currentHealth);
     }
     
     public bool TakeDamage(int amount)
