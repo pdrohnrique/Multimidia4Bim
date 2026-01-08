@@ -4,6 +4,7 @@ using UnityEngine;
 public class NotesManager : MonoBehaviour
 {
     public List<ItemData> collectedNotes = new List<ItemData>();
+    public int currentIndex;
     public GameObject notesMenu; // painel de UI que você cria depois
 
     public void AddNote(ItemData note)
@@ -12,6 +13,29 @@ public class NotesManager : MonoBehaviour
             collectedNotes.Add(note);
     }
 
+    public bool HasNotes => collectedNotes.Count > 0;
+
+    public ItemData GetCurrentNote()
+    {
+        if (!HasNotes) return null;
+        currentIndex = Mathf.Clamp(currentIndex, 0, collectedNotes.Count - 1);
+        return collectedNotes[currentIndex];
+    }
+
+    public void NextNote()
+    {
+        if (!HasNotes) return;
+        currentIndex++;
+        if  (currentIndex >= collectedNotes.Count) currentIndex = 0;
+    }
+
+    public void PreviousNote()
+    {
+        if (!HasNotes) return;
+        currentIndex--;
+        if (currentIndex < 0) currentIndex = collectedNotes.Count - 1;
+    }
+    
     public void ToggleNotesMenu()
     {
         if (notesMenu == null) return;
