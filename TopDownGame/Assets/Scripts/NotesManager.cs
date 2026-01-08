@@ -5,7 +5,7 @@ public class NotesManager : MonoBehaviour
 {
     public List<ItemData> collectedNotes = new List<ItemData>();
     public int currentIndex;
-    public GameObject notesMenu; // painel de UI que você cria depois
+    public GameObject notesMenu;
 
     public void AddNote(ItemData note)
     {

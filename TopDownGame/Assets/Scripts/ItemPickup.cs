@@ -30,6 +30,17 @@ public class ItemPickup : MonoBehaviour
 
         _playerInventory.AddItem(itemData);
 
+        // Se for nota, avisa o NotesManager do player
+        if (itemData.type == ItemType.Note)
+        {
+            var notes = _playerInventory.GetComponent<NotesManager>();
+            if (notes != null)
+            {
+                notes.AddNote(itemData);
+                Debug.Log("Nota adicionada ao NotesManager: " + itemData.itemName);
+            }
+        }
+        
         // Chave: também liga com PlayerController, se quiser feedback
         if (itemData.type == ItemType.Key)
         {

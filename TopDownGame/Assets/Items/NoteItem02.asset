@@ -10,10 +10,10 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 44e98c035a5064a488232c11fb9d7cd1, type: 3}
-  m_Name: NoteItem01
+  m_Name: NoteItem02
   m_EditorClassIdentifier: 
-  itemName: Aviso de Perigo
+  itemName: Segundo aviso...
   type: 2
   icon: {fileID: 0}
   maxStack: 3
-  noteText: "Se voc\xEA encontrou essa nota, corra! Sua vida corre perigo..."
+  noteText: "Voc\xEA foi avisado, agora n\xE3o adianta correr!"

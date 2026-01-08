@@ -102,15 +102,6 @@ public class PlayerController : MonoBehaviour
                 RechargeBattery(25f); // ajusta valor depois
             }
         }
-
-        // Tab = abrir menu de notas
-        if (Input.GetKeyDown(KeyCode.Tab))
-        {
-            NotesManager notes = GetComponent<NotesManager>();
-            if (notes != null)
-                notes.ToggleNotesMenu();
-        }
-
     }
 
     void FixedUpdate()

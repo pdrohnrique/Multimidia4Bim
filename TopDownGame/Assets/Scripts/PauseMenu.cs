@@ -6,6 +6,7 @@ public class PauseMenu : MonoBehaviour
     public GameObject pausePanel;
     public GameObject optionsPanel;
     bool _isPaused;
+    public bool IsPaused => _isPaused;
 
     void Awake()
     {
@@ -14,20 +15,19 @@ public class PauseMenu : MonoBehaviour
 
         if (pausePanel != null)
             pausePanel.SetActive(false);
+        if (optionsPanel != null)
+            optionsPanel.SetActive(false);
 
         Cursor.visible = false;
         Cursor.lockState = CursorLockMode.Locked;
     }
-
-    void Update()
+    
+    public void TogglePause()
     {
-        if (Input.GetKeyDown(KeyCode.Escape))
-        {
-            if (_isPaused)
-                ResumeGame();
-            else
-                PauseGame();
-        }
+        if (_isPaused)
+            ResumeGame();
+        else
+            PauseGame();
     }
 
     private void PauseGame()
@@ -42,8 +42,10 @@ public class PauseMenu : MonoBehaviour
         Cursor.lockState = CursorLockMode.None;
     }
 
-    public void ResumeGame()
+    private void ResumeGame()
     {
+        if (optionsPanel != null)
+            optionsPanel.SetActive(false);
         if (pausePanel != null)
             pausePanel.SetActive(false);
 
@@ -60,7 +62,6 @@ public class PauseMenu : MonoBehaviour
 
         pausePanel.SetActive(false);
         optionsPanel.SetActive(true);
-
         // continua pausado, cursor já está visível
     }
 
@@ -70,9 +71,9 @@ public class PauseMenu : MonoBehaviour
 
         optionsPanel.SetActive(false);
         pausePanel.SetActive(true);
+        // continua pausado
     }
     
-    // Botão "Menu Principal"
     public void GoToMainMenu()
     {
         Time.timeScale = 1f;
@@ -81,13 +82,12 @@ public class PauseMenu : MonoBehaviour
         SceneManager.LoadScene("TitleScreen");
     }
 
-    // Botão "Sair do Jogo"
     public void QuitGame()
     {
         Time.timeScale = 1f;
         Application.Quit();
-        #if UNITY_EDITOR
+#if UNITY_EDITOR
         UnityEditor.EditorApplication.isPlaying = false;
-        #endif
+#endif
     }
 }
