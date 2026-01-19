@@ -1,4 +1,5 @@
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 public class Health : MonoBehaviour
 {
@@ -13,6 +14,7 @@ public class Health : MonoBehaviour
     void Awake()
     {
         _currentHealth = maxHealth;
+        Time.timeScale = 1f; // garante normal ao entrar na cena
     }
 
     void Update()
@@ -36,7 +38,7 @@ public class Health : MonoBehaviour
     
     public bool TakeDamage(int amount)
     {
-        if (_isInvincible) return false; // não tomou dano
+        if (_isInvincible) return false;
         
         _currentHealth -= amount;
         _currentHealth = Mathf.Clamp(_currentHealth, 0, maxHealth);
@@ -49,13 +51,13 @@ public class Health : MonoBehaviour
         {
             Die();
         }
-        return true; // dano aplicado
+        return true;
     }
 
     void Die()
     {
         Debug.Log("Morreu.");
-        Time.timeScale = 0f;
-        // depois: animação, reload de cena, etc.
+        Time.timeScale = 1f; // garante tempo normal
+        SceneManager.LoadScene("MainScene"); // usa o nome exato da sua cena
     }
 }

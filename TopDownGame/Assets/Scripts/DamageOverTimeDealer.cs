@@ -2,8 +2,8 @@ using UnityEngine;
 
 public class DamageOverTimeDealer : MonoBehaviour
 {
-    public int damage = 10;              // dano por tick
-    public float damageInterval = 0.5f;  // intervalo entre danos em segundos
+    public int damage = 10;
+    public float damageInterval = 0.5f;
 
     Collider2D _targetInside;
     float _timer;
@@ -36,6 +36,11 @@ public class DamageOverTimeDealer : MonoBehaviour
 
     void ApplyDamage(Collider2D other)
     {
+        // Se for player escondido, não dá dano
+        PlayerController player = other.GetComponent<PlayerController>();
+        if (player != null && player.isHiding)
+            return;
+
         Health health = other.GetComponent<Health>();
         if (health == null) return;
 

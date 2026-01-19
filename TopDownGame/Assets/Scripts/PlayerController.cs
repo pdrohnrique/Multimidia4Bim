@@ -23,6 +23,7 @@ public class PlayerController : MonoBehaviour
     public bool isHiding;
     public Inventory inventory;
     public Health health;
+    public bool IsFlashlightOn => flashlight != null && flashlight.enabled;
     
     public void GiveKey()
     {
