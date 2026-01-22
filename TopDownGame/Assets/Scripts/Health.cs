@@ -1,19 +1,20 @@
 using UnityEngine;
 using UnityEngine.SceneManagement;
+using UnityEngine.Serialization;
 
 public class Health : MonoBehaviour
 {
     public int maxHealth = 100;
     public float invincibilityTime = 0.8f;
-    public int Current => _currentHealth;
+    public int Current => currentHealth;
     
-    int _currentHealth;
+    [FormerlySerializedAs("_currentHealth")] public int currentHealth;
     bool _isInvincible;
     float _invincibleCounter;
 
     void Awake()
     {
-        _currentHealth = maxHealth;
+        currentHealth = maxHealth;
         Time.timeScale = 1f; // garante normal ao entrar na cena
     }
 
@@ -31,23 +32,23 @@ public class Health : MonoBehaviour
     
     public void Heal(int amount)
     {
-        _currentHealth += amount;
-        _currentHealth = Mathf.Clamp(_currentHealth, 0, maxHealth);
-        Debug.Log("Vida curada. Atual: " + _currentHealth);
+        currentHealth += amount;
+        currentHealth = Mathf.Clamp(currentHealth, 0, maxHealth);
+        Debug.Log("Vida curada. Atual: " + currentHealth);
     }
     
     public bool TakeDamage(int amount)
     {
         if (_isInvincible) return false;
         
-        _currentHealth -= amount;
-        _currentHealth = Mathf.Clamp(_currentHealth, 0, maxHealth);
+        currentHealth -= amount;
+        currentHealth = Mathf.Clamp(currentHealth, 0, maxHealth);
         _isInvincible = true;
         _invincibleCounter = invincibilityTime;
 
-        Debug.Log("Vida atual: " + _currentHealth);
+        Debug.Log("Vida atual: " + currentHealth);
 
-        if (_currentHealth <= 0)
+        if (currentHealth <= 0)
         {
             Die();
         }

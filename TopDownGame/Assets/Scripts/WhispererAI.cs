@@ -3,15 +3,16 @@ using UnityEngine;
 public class WhispererAI : MonoBehaviour
 {
     public Transform player;
-    public float driftSpeed = 1.5f;        // movimento “fantasma” normal
-    public float huntSpeed = 2f;           // quando está caçando na área
-    public float chaseSpeed = 3.5f;        // perseguição direta
+    public float driftSpeed = 1.5f;
+    public float huntSpeed = 2f;
+    public float chaseSpeed = 3.5f;
 
-    public float huntRadius = 10f;         // raio grande onde ele “sente” o player
-    public float chaseRadius = 3f;         // raio pequeno para perseguição
+    public float huntRadius = 10f;
+    public float chaseRadius = 3f;
 
-    public float driftRadius = 5f;         // raio em torno de um ponto base
-    public Transform driftCenter;          // se vazio, usa a posição inicial
+    [Header("Drift Area")]
+    public BoxCollider2D driftArea;   // NOVO: área retangular
+    public float minDriftPointDistance = 0.2f;
 
     enum State { Drift, HuntArea, Chase }
     State _state;
@@ -23,9 +24,6 @@ public class WhispererAI : MonoBehaviour
     void Start()
     {
         _rb = GetComponent<Rigidbody2D>();
-
-        if (driftCenter == null)
-            driftCenter = transform;
 
         _state = State.Drift;
         PickNewDriftTarget();
@@ -40,7 +38,6 @@ public class WhispererAI : MonoBehaviour
 
         float dist = Vector2.Distance(transform.position, player.position);
 
-        // TRANSIÇÕES DE ESTADO
         switch (_state)
         {
             case State.Drift:
@@ -52,7 +49,7 @@ public class WhispererAI : MonoBehaviour
                 break;
 
             case State.HuntArea:
-                if (dist > huntRadius * 1.2f) // saiu bem da área -> volta a Drift
+                if (dist > huntRadius * 1.2f)
                 {
                     _state = State.Drift;
                     PickNewDriftTarget();
@@ -64,7 +61,6 @@ public class WhispererAI : MonoBehaviour
                 break;
 
             case State.Chase:
-                // se ficou longe demais ou lanterna apagada, volta para HuntArea
                 if (dist > chaseRadius * 1.5f || (_playerController != null && !_playerController.IsFlashlightOn))
                 {
                     _state = dist <= huntRadius ? State.HuntArea : State.Drift;
@@ -88,7 +84,7 @@ public class WhispererAI : MonoBehaviour
             case State.Drift:
                 target = _currentTarget;
                 speed = driftSpeed;
-                if (Vector2.Distance(pos, _currentTarget) < 0.2f)
+                if (Vector2.Distance(pos, _currentTarget) < minDriftPointDistance)
                     PickNewDriftTarget();
                 break;
 
@@ -111,39 +107,43 @@ public class WhispererAI : MonoBehaviour
 
     void PickNewDriftTarget()
     {
-        Vector2 center = driftCenter.position;
-        _currentTarget = center + Random.insideUnitCircle * driftRadius;
+        if (driftArea == null)
+        {
+            _currentTarget = transform.position;
+            return;
+        }
+
+        Bounds b = driftArea.bounds;
+        float x = Random.Range(b.min.x, b.max.x);
+        float y = Random.Range(b.min.y, b.max.y);
+        _currentTarget = new Vector2(x, y);
     }
 
     void PickNewHuntTarget()
     {
-        // patrol aleatório dentro do raio grande em torno do player
         Vector2 center = player.position;
         _currentTarget = center + Random.insideUnitCircle * (huntRadius * 0.6f);
     }
-    
+
     void OnDrawGizmosSelected()
     {
-        // Desenha área de drift (em torno do driftCenter)
-        Transform center = driftCenter != null ? driftCenter : transform;
-        Gizmos.color = new Color(0f, 0.5f, 1f, 0.25f); // azul
-        Gizmos.DrawWireSphere(center.position, driftRadius);
+        // Drift area
+        if (driftArea != null)
+        {
+            Gizmos.color = new Color(0f, 0.5f, 1f, 0.25f);
+            Gizmos.DrawWireCube(driftArea.bounds.center, driftArea.bounds.size);
+        }
 
-        // Se tiver player, desenha hunt/chase em torno dele
         if (player != null)
         {
-            // Raio grande (HuntArea)
-            Gizmos.color = new Color(1f, 0.5f, 0f, 0.25f); // laranja
+            Gizmos.color = new Color(1f, 0.5f, 0f, 0.25f);
             Gizmos.DrawWireSphere(player.position, huntRadius);
 
-            // Raio pequeno (Chase)
-            Gizmos.color = new Color(1f, 0f, 0f, 0.5f); // vermelho
+            Gizmos.color = new Color(1f, 0f, 0f, 0.5f);
             Gizmos.DrawWireSphere(player.position, chaseRadius);
         }
 
-        // Ponto-alvo atual
         Gizmos.color = Color.cyan;
         Gizmos.DrawSphere(_currentTarget, 0.15f);
     }
-
 }
