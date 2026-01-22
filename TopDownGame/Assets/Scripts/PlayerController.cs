@@ -149,6 +149,17 @@ public class PlayerController : MonoBehaviour
                 return;
             }
         }
+        
+        foreach (var h in hits)
+        {
+            BossHitSwitch bossSwitch = h.GetComponent<BossHitSwitch>();
+            if (bossSwitch != null)
+            {
+                bossSwitch.OnInteract();
+                return;
+            }
+        }
+
     }
 
     public void ToggleHide()

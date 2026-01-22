@@ -12,13 +12,10 @@ public class BossController : MonoBehaviour
     public float minTargetDistance = 0.3f;
 
     [Header("Ataque - Projétil simples")]
-    public GameObject simpleProjectilePrefab;
+    public GameObject projectilePrefab;
     public float phase1ShotInterval = 1.2f;
-
-    [Header("Ataque - Projétil persistente")]
-    public GameObject stickyProjectilePrefab;
-    public float phase2ShotInterval = 1.5f;
-    public float phase3ExtraShotInterval = 1.5f;
+    public float phase2ShotInterval = 1.0f;
+    public float phase3ShotInterval = 0.7f;
 
     public Transform firePoint;
 
@@ -30,29 +27,32 @@ public class BossController : MonoBehaviour
     Phase _phase;
 
     Rigidbody2D _rb;
-    Health _health;
+    BossHealth _health;
     Vector2 _currentTarget;
 
-    float _shotTimerSimple;
-    float _shotTimerSticky;
+    float _shotTimer;
 
     void Awake()
     {
         _rb = GetComponent<Rigidbody2D>();
-        _health = GetComponent<Health>();
+        _health = GetComponent<BossHealth>();
+
+        if (player == null)
+        {
+            GameObject p = GameObject.FindGameObjectWithTag("Player");
+            if (p != null) player = p.transform;
+        }
     }
 
     void Start()
     {
-        Debug.Log("Boss START");
         _phase = Phase.Phase1;
         PickNewMoveTarget();
-        ResetShotTimers();
+        ResetShotTimer();
     }
 
     void Update()
     {
-        Debug.Log("Boss UPDATE rodando");
         if (player == null || _health == null) return;
 
         UpdatePhase();
@@ -61,12 +61,12 @@ public class BossController : MonoBehaviour
 
     void FixedUpdate()
     {
-        HandleMovement(Time.fixedDeltaTime);
+        HandleMovement();
     }
 
     void UpdatePhase()
     {
-        float healthPercent = (float)_health.currentHealth / _health.maxHealth;
+        float healthPercent = (float)_health.Current / _health.maxHealth;
 
         if (healthPercent <= phase3Threshold)
             _phase = Phase.Phase3;
@@ -76,7 +76,7 @@ public class BossController : MonoBehaviour
             _phase = Phase.Phase1;
     }
 
-    void HandleMovement(float dt)
+    void HandleMovement()
     {
         if (moveArea == null || _rb == null) return;
 
@@ -89,14 +89,14 @@ public class BossController : MonoBehaviour
             case Phase.Phase1:
                 speed = baseDriftSpeed;
                 break;
+
             case Phase.Phase2:
                 speed = baseDriftSpeed * phase2SpeedMultiplier;
                 break;
+
             case Phase.Phase3:
                 speed = baseDriftSpeed * phase3SpeedMultiplier;
-
-                // Fase 3: puxa o alvo um pouco na direção do player
-                Vector2 towardPlayer = (Vector2)player.position;
+                Vector2 towardPlayer = player.position;
                 target = Vector2.Lerp(_currentTarget, towardPlayer, 0.4f);
                 break;
         }
@@ -110,69 +110,30 @@ public class BossController : MonoBehaviour
 
     void HandleShooting(float dt)
     {
-        if (firePoint == null) return;
+        if (firePoint == null || projectilePrefab == null) return;
 
-        _shotTimerSimple -= dt;
-        _shotTimerSticky -= dt;
+        _shotTimer -= dt;
 
-        switch (_phase)
+        float interval = phase1ShotInterval;
+        if (_phase == Phase.Phase2) interval = phase2ShotInterval;
+        else if (_phase == Phase.Phase3) interval = phase3ShotInterval;
+
+        if (_shotTimer <= 0f)
         {
-            case Phase.Phase1:
-                if (_shotTimerSimple <= 0f)
-                {
-                    _shotTimerSimple = phase1ShotInterval;
-                    ShootSimpleAtPlayer();
-                }
-                break;
-
-            case Phase.Phase2:
-                if (_shotTimerSticky <= 0f)
-                {
-                    _shotTimerSticky = phase2ShotInterval;
-                    ShootStickyAtPlayer();
-                }
-                break;
-
-            case Phase.Phase3:
-                if (_shotTimerSimple <= 0f)
-                {
-                    _shotTimerSimple = phase1ShotInterval;
-                    ShootSimpleAtPlayer();
-                }
-
-                if (_shotTimerSticky <= 0f)
-                {
-                    _shotTimerSticky = phase3ExtraShotInterval;
-                    ShootStickyAtPlayer();
-                }
-                break;
+            _shotTimer = interval;
+            ShootAtPlayer();
         }
     }
 
-    void ShootSimpleAtPlayer()
+    void ShootAtPlayer()
     {
-        if (simpleProjectilePrefab == null || player == null) return;
+        if (player == null) return;
 
         Vector2 dir = (player.position - firePoint.position).normalized;
-        GameObject proj = Instantiate(simpleProjectilePrefab, firePoint.position, Quaternion.identity);
+        GameObject proj = Instantiate(projectilePrefab, firePoint.position, Quaternion.identity);
         BossProjectile bp = proj.GetComponent<BossProjectile>();
         if (bp != null)
         {
-            bp.stickOnHit = false;
-            bp.Init(dir);
-        }
-    }
-
-    void ShootStickyAtPlayer()
-    {
-        if (stickyProjectilePrefab == null || player == null) return;
-
-        Vector2 dir = (player.position - firePoint.position).normalized;
-        GameObject proj = Instantiate(stickyProjectilePrefab, firePoint.position, Quaternion.identity);
-        BossProjectile bp = proj.GetComponent<BossProjectile>();
-        if (bp != null)
-        {
-            bp.stickOnHit = true;
             bp.Init(dir);
         }
     }
@@ -187,10 +148,9 @@ public class BossController : MonoBehaviour
         _currentTarget = new Vector2(x, y);
     }
 
-    void ResetShotTimers()
+    void ResetShotTimer()
     {
-        _shotTimerSimple = Random.Range(0f, phase1ShotInterval);
-        _shotTimerSticky = Random.Range(0f, phase2ShotInterval);
+        _shotTimer = phase1ShotInterval;
     }
 
     void OnDrawGizmosSelected()
