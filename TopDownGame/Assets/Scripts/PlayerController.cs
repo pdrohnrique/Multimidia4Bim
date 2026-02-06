@@ -7,6 +7,9 @@ public class PlayerController : MonoBehaviour
     public float speed = 5f;
     public float runSpeed = 8f;
     
+    [Header("Animator")]
+    public Animator animator;
+    
     [Header("Lanterna")]
     public Light2D flashlight;
     public float maxBattery = 100f;
@@ -19,6 +22,7 @@ public class PlayerController : MonoBehaviour
     private float _battery;
     private Rigidbody2D _rb;
     private SpriteRenderer _sr;
+    private Animator _animator;
     public bool hasKey;
     public bool isHiding;
     public Inventory inventory;
@@ -35,6 +39,8 @@ public class PlayerController : MonoBehaviour
     {
         _rb = GetComponent<Rigidbody2D>();
         _sr = GetComponent<SpriteRenderer>();
+        _animator = GetComponent<Animator>();
+        
         _battery = maxBattery;
         flashlight.enabled = false;
         
@@ -62,11 +68,27 @@ public class PlayerController : MonoBehaviour
         // MOVIMENTO TOP-DOWN (WASD) - só lê input aqui
         float horizontal = Input.GetAxisRaw("Horizontal");
         float vertical = Input.GetAxisRaw("Vertical");
-        _input = new Vector2(horizontal, vertical).normalized;
+
+        if (_animator != null)
+        {
+            _animator.SetFloat("InputX", horizontal);
+            _animator.SetFloat("InputY", vertical);
+    
+            if (_input.magnitude > 0.1f && (horizontal != 0 || vertical != 0))  // Movendo?
+            {
+                _animator.SetBool("isWalking", true);
+                _animator.SetFloat("LastInputX", horizontal);  // SALVA DURANTE movimento
+                _animator.SetFloat("LastInputY", vertical);
+            }
+            else
+            {
+                _animator.SetBool("isWalking", false);
+                // NÃO sobrescreve LastInput quando parado!
+            }
+        }
+
         
-        // FLIP SPRITE (olha para onde anda)
-        if (horizontal > 0) _sr.flipX = false;
-        else if (horizontal < 0) _sr.flipX = true;
+        _input = new Vector2(horizontal, vertical).normalized;
         
         // LANTERNA (F)
         if (Input.GetKeyUp(KeyCode.F))
