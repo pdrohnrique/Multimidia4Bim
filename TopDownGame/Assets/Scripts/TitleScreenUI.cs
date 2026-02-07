@@ -4,6 +4,7 @@ using UnityEngine.SceneManagement;
 public class TitleScreenUI : MonoBehaviour
 {
     public GameObject optionsPanel; // painel de opções (som)
+    public GameObject controlsPanel;
 
     public void OnPlayPressed()
     {
@@ -11,16 +12,22 @@ public class TitleScreenUI : MonoBehaviour
         SceneManager.LoadScene("MainScene");
     }
 
+    public void OnControlsPressed()
+    {
+        if  (controlsPanel == null) return;   
+        controlsPanel.SetActive(true);
+    }
+    
     public void OnOptionsPressed()
     {
         if (optionsPanel == null) return;
         optionsPanel.SetActive(true);
     }
 
-    public void OnBackFromOptions()
+    public void OnBackFromControls()
     {
-        if (optionsPanel == null) return;
-        optionsPanel.SetActive(false);
+        if (controlsPanel == null) return;
+        controlsPanel.SetActive(false);
     }
 
     public void OnQuitPressed()

@@ -56,7 +56,10 @@ public class PlayerController : MonoBehaviour
         if (Input.GetKeyDown(KeyCode.E))
         {
             HandleInteraction(); // função que já faz porta / esconderijo
+            //animator.SetTrigger("Attack");
         }
+        
+        //if (Input.GetKeyDown(KeyCode.Space)) animator.SetTrigger("Jump");
         
         // Se estiver escondido, não processa movimento e lanterna
         if (isHiding)
